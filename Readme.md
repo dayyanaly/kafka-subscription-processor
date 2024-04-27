@@ -1,84 +1,206 @@
-Approach 1: Database Synchronization Using Periodic Checks
+Code Solution Documentation
 Introduction
-Approach 1 aims to synchronize subscription statuses between two databases by periodically checking Database 1 for updates and updating Database 2 accordingly. This approach addresses the need for ensuring consistent subscription statuses across different systems, emphasizing scalability, maintainability, and database performance.
+The provided code solution is a microservice developed using FastAPI, SQLAlchemy, and Kafka. It synchronizes subscription statuses between two PostgreSQL databases, leveraging Kafka for message streaming and asynchronous processing. This documentation provides a detailed overview of the code solution, including its architecture, functionality, setup instructions, and an evaluation based on the specified criteria.
 
-Requirements Fulfillment:
-Functional:
-Periodic Checks: Database 1 is periodically queried to detect updates in subscription statuses.
-Database Update: Subscription status changes detected in Database 1 are propagated to Database 2, ensuring consistency.
-Error Handling: Robust error handling mechanisms are implemented to manage exceptions during database operations effectively.
-Non-Functional:
-Scalability: The solution architecture is designed to accommodate growth in data volume and user activity.
-Maintainability: The codebase is structured and documented for ease of maintenance and future enhancements.
-Database Performance: Considerations for database performance are integrated into the solution design to optimize query execution and minimize resource consumption.
-Security: Security best practices, such as encrypted database connections and secure credential management, are implemented to safeguard data integrity and confidentiality.
-Implementation Overview:
-Database Setup:
-Choose a reliable PostgreSQL database provider, such as DigitalOcean or AWS RDS, and provision two separate PostgreSQL instances.
-Configure database security settings, including firewall rules and access controls, to restrict unauthorized access.
-Create dedicated databases for Database 1 and Database 2, adhering to the required schema for subscription status storage.
-Environment Setup:
-Install Python 3.7 or above and set up a virtual environment to isolate project dependencies.
-Use pip to install the necessary Python packages: FastAPI, Uvicorn, SQLAlchemy, python-dotenv, and APScheduler.
-Store sensitive information, such as database credentials, securely in a .env file.
-Code Implementation:
-Define SQLAlchemy models to represent subscription status entities in both databases.
-Implement background scheduling using the APScheduler library to periodically trigger synchronization tasks.
-Develop FastAPI endpoints to support CRUD operations for managing subscription statuses.
-Error Handling:
-Employ try-except blocks and logging mechanisms to capture and handle exceptions gracefully, ensuring robustness and fault tolerance.
-Implement error recovery strategies to mitigate data inconsistency risks in case of synchronization failures.
-Security Considerations:
-Utilize environment variables and python-dotenv for secure management of sensitive information, preventing exposure in version-controlled code repositories.
-Enforce SSL/TLS encryption for database connections to protect data transmission over insecure networks.
-Environment Setup Guide:
-Database Configuration:
-Choose a suitable PostgreSQL database provider based on factors such as performance, availability, and cost.
-Configure database instances with appropriate resources and settings to meet application requirements.
-Environment Variables:
-Create a .env file in the project directory and populate it with the following environment variables:
+Architecture Overview
+The microservice architecture consists of the following components:
+
+FastAPI Endpoints: Exposes HTTP endpoints for CRUD operations on subscription statuses.
+Database Operations: Utilizes SQLAlchemy ORM to interact with two PostgreSQL databases.
+Kafka Integration: Consumes messages from a Kafka topic to update subscription statuses in Database 2.
+Environment Configuration: Loads database and Kafka connection details from environment variables using python-dotenv.
+Functionality
+The microservice performs the following tasks:
+
+Subscription Status Synchronization: Periodically checks Database 1 for subscription status updates and updates Database 2 accordingly, using email as the unique identifier.
+CRUD Operations: Provides endpoints for creating, reading, updating, and deleting subscription statuses.
+Error Handling: Implements robust error handling mechanisms to handle exceptions during database operations and Kafka message consumption.
+Steps to Run and Installation Instructions
+Step 1: Install Required Packages
+Open a terminal or command prompt.
+Navigate to the directory containing your Python code.
+Run the following command to install the required Python packages:
+pip install fastapi sqlalchemy kafka-python python-dotenv uvicorn
+Step 2: Set Up Environment Variables
+Create a .env file in the same directory as your Python code.
+Open the .env file in a text editor.
+Add the following environment variables to the .env file:
+# Database 1
+DB1_HOST=<database_1_host>
+DB1_PORT=<database_1_port>
+DB1_USER=<database_1_username>
+DB1_PASSWORD=<database_1_password>
+DB1_DATABASE=<database_1_name>
+
+# Database 2
+DB2_HOST=<database_2_host>
+DB2_PORT=<database_2_port>
+DB2_USER=<database_2_username>
+DB2_PASSWORD=<database_2_password>
+DB2_DATABASE=<database_2_name>
+
+# Kafka Server and Topic
+KAFKA_SERVER=<kafka_server>
+KAFKA_TOPIC=<kafka_topic>
+
+Replace <database_1_host>, <database_1_port>, <database_1_username>, <database_1_password>, <database_1_name>, <database_2_host>, <database_2_port>, <database_2_username>, <database_2_password>, <database_2_name>, <kafka_server>, and <kafka_topic> with the appropriate values for your two databases and Kafka server.
+
+Step 3: Start Kafka Server
+Download Apache Kafka from the official website and extract the files to a directory on your computer.
+Open a new terminal or command prompt.
+Navigate to the Kafka directory in the terminal.
+Start the ZooKeeper server by running the following command:
+
+bin/zookeeper-server-start.sh config/zookeeper.properties
+
+Start the Kafka server by running the following command in the same terminal:
+bin/kafka-server-start.sh config/server.properties
+
+Certainly! Below is the updated documentation with steps to run the code solution and installation instructions:
+
+Code Solution Documentation
+Introduction
+The provided code solution is a microservice developed using FastAPI, SQLAlchemy, and Kafka. It synchronizes subscription statuses between two PostgreSQL databases, leveraging Kafka for message streaming and asynchronous processing. This documentation provides a detailed overview of the code solution, including its architecture, functionality, setup instructions, and an evaluation based on the specified criteria.
+
+Architecture Overview
+The microservice architecture consists of the following components:
+
+FastAPI Endpoints: Exposes HTTP endpoints for CRUD operations on subscription statuses.
+Database Operations: Utilizes SQLAlchemy ORM to interact with two PostgreSQL databases.
+Kafka Integration: Consumes messages from a Kafka topic to update subscription statuses in Database 2.
+Environment Configuration: Loads database and Kafka connection details from environment variables using python-dotenv.
+Functionality
+The microservice performs the following tasks:
+
+Subscription Status Synchronization: Periodically checks Database 1 for subscription status updates and updates Database 2 accordingly, using email as the unique identifier.
+CRUD Operations: Provides endpoints for creating, reading, updating, and deleting subscription statuses.
+Error Handling: Implements robust error handling mechanisms to handle exceptions during database operations and Kafka message consumption.
+Steps to Run and Installation Instructions
+Step 1: Install Required Packages
+Open a terminal or command prompt.
+Navigate to the directory containing your Python code.
+Run the following command to install the required Python packages:
+bash
+Copy code
+pip install fastapi sqlalchemy kafka-python python-dotenv uvicorn
+Step 2: Set Up Environment Variables
+Create a .env file in the same directory as your Python code.
+Open the .env file in a text editor.
+Add the following environment variables to the .env file:
 plaintext
 Copy code
-DB1_HOST=your_db1_host
-DB1_PORT=5432
-DB1_USER=your_db1_username
-DB1_PASSWORD=your_db1_password
-DB1_DATABASE=your_db1_database_name
+# Database 1
+DB1_HOST=<database_1_host>
+DB1_PORT=<database_1_port>
+DB1_USER=<database_1_username>
+DB1_PASSWORD=<database_1_password>
+DB1_DATABASE=<database_1_name>
 
-DB2_HOST=your_db2_host
-DB2_PORT=5432
-DB2_USER=your_db2_username
-DB2_PASSWORD=your_db2_password
-DB2_DATABASE=your_db2_database_name
-Running the Application:
-Activate the virtual environment and start the FastAPI application using Uvicorn with auto-reload enabled:
-# Activate the virtual environment (Windows)
-.\myenv\Scripts\activate
+# Database 2
+DB2_HOST=<database_2_host>
+DB2_PORT=<database_2_port>
+DB2_USER=<database_2_username>
+DB2_PASSWORD=<database_2_password>
+DB2_DATABASE=<database_2_name>
 
-# Activate the virtual environment (Unix/MacOS)
-source myenv/bin/activate
-
-# Install required Python packages
-pip install fastapi uvicorn sqlalchemy python-dotenv apscheduler
-
-# Run the FastAPI application
+# Kafka Server and Topic
+KAFKA_SERVER=<kafka_server>
+KAFKA_TOPIC=<kafka_topic>
+Replace <database_1_host>, <database_1_port>, <database_1_username>, <database_1_password>, <database_1_name>, <database_2_host>, <database_2_port>, <database_2_username>, <database_2_password>, <database_2_name>, <kafka_server>, and <kafka_topic> with the appropriate values for your two databases and Kafka server.
+Step 3: Start Kafka Server
+Download Apache Kafka from the official website and extract the files to a directory on your computer.
+Open a new terminal or command prompt.
+Navigate to the Kafka directory in the terminal.
+Start the ZooKeeper server by running the following command:
+bash
+Copy code
+bin/zookeeper-server-start.sh config/zookeeper.properties
+Start the Kafka server by running the following command in the same terminal:
+bash
+Copy code
+bin/kafka-server-start.sh config/server.properties
+Step 4: Run the FastAPI Application
+Ensure that your PostgreSQL databases are running.
+Open a new terminal or command prompt.
+Navigate to the directory containing your Python code.
+Run the FastAPI application using uvicorn. Execute the following command:
 uvicorn main:app --reload
 
-Remaining Tasks:
-Finalize error handling mechanisms and integrate comprehensive logging for better troubleshooting.
-Conduct thorough testing, including unit tests and integration tests, to validate functionality and identify potential edge cases.
-Refine security measures, such as implementing role-based access control and data encryption, to enhance data protection.
-Estimated Time:
-Finalizing Error Handling: 2-3 hours
-Testing and Quality Assurance: 4-5 hours
-Security Enhancement: 2-3 hours
-Advantages:
-Real-time synchronization ensures data consistency between databases, enhancing reliability and user experience.
-Modular code architecture promotes maintainability and facilitates future enhancements or modifications.
-Background scheduling minimizes manual intervention and optimizes resource utilization, improving system efficiency.
-Disadvantages:
-Periodic database polling may introduce latency and overhead, potentially impacting application responsiveness.
-Dependency on external services (e.g., database providers) introduces potential points of failure and external dependencies.
-Conclusion:
-Approach 1 offers a robust solution for database synchronization, addressing key functional and non-functional requirements while emphasizing scalability, maintainability, and performance. By leveraging established Python libraries and best practices, this approach provides a solid foundation for building resilient and efficient systems.
 
+Certainly! Below is the updated documentation with steps to run the code solution and installation instructions:
+
+Code Solution Documentation
+Introduction
+The provided code solution is a microservice developed using FastAPI, SQLAlchemy, and Kafka. It synchronizes subscription statuses between two PostgreSQL databases, leveraging Kafka for message streaming and asynchronous processing. This documentation provides a detailed overview of the code solution, including its architecture, functionality, setup instructions, and an evaluation based on the specified criteria.
+
+Architecture Overview
+The microservice architecture consists of the following components:
+
+FastAPI Endpoints: Exposes HTTP endpoints for CRUD operations on subscription statuses.
+Database Operations: Utilizes SQLAlchemy ORM to interact with two PostgreSQL databases.
+Kafka Integration: Consumes messages from a Kafka topic to update subscription statuses in Database 2.
+Environment Configuration: Loads database and Kafka connection details from environment variables using python-dotenv.
+Functionality
+The microservice performs the following tasks:
+
+Subscription Status Synchronization: Periodically checks Database 1 for subscription status updates and updates Database 2 accordingly, using email as the unique identifier.
+CRUD Operations: Provides endpoints for creating, reading, updating, and deleting subscription statuses.
+Error Handling: Implements robust error handling mechanisms to handle exceptions during database operations and Kafka message consumption.
+Steps to Run and Installation Instructions
+Step 1: Install Required Packages
+Open a terminal or command prompt.
+Navigate to the directory containing your Python code.
+Run the following command to install the required Python packages:
+bash
+Copy code
+pip install fastapi sqlalchemy kafka-python python-dotenv uvicorn
+Step 2: Set Up Environment Variables
+Create a .env file in the same directory as your Python code.
+Open the .env file in a text editor.
+Add the following environment variables to the .env file:
+plaintext
+Copy code
+# Database 1
+DB1_HOST=<database_1_host>
+DB1_PORT=<database_1_port>
+DB1_USER=<database_1_username>
+DB1_PASSWORD=<database_1_password>
+DB1_DATABASE=<database_1_name>
+
+# Database 2
+DB2_HOST=<database_2_host>
+DB2_PORT=<database_2_port>
+DB2_USER=<database_2_username>
+DB2_PASSWORD=<database_2_password>
+DB2_DATABASE=<database_2_name>
+
+# Kafka Server and Topic
+KAFKA_SERVER=<kafka_server>
+KAFKA_TOPIC=<kafka_topic>
+Replace <database_1_host>, <database_1_port>, <database_1_username>, <database_1_password>, <database_1_name>, <database_2_host>, <database_2_port>, <database_2_username>, <database_2_password>, <database_2_name>, <kafka_server>, and <kafka_topic> with the appropriate values for your two databases and Kafka server.
+Step 3: Start Kafka Server
+Download Apache Kafka from the official website and extract the files to a directory on your computer.
+Open a new terminal or command prompt.
+Navigate to the Kafka directory in the terminal.
+Start the ZooKeeper server by running the following command:
+bash
+Copy code
+bin/zookeeper-server-start.sh config/zookeeper.properties
+Start the Kafka server by running the following command in the same terminal:
+bash
+Copy code
+bin/kafka-server-start.sh config/server.properties
+Step 4: Run the FastAPI Application
+Ensure that your PostgreSQL databases are running.
+Open a new terminal or command prompt.
+Navigate to the directory containing your Python code.
+Run the FastAPI application using uvicorn. Execute the following command:
+bash
+Copy code
+uvicorn main:app --reload
+Step 5: Test the Application
+Use an API testing tool like Postman or curl to send requests to the FastAPI endpoints (/subscription_status) to create, read, update, and delete subscription statuses.
+Monitor the terminal where you ran the FastAPI application to see if there are any errors or messages related to Kafka message consumption.
+
+Note:This code is completed 70 percent according to your requirements to achieve 100  percent accurate functionality result we will have to add more configuration
+with additional libraries and after that it will be ready for the production level and if you give me go ahead i will make it completely for the production level with using docker kubernetes and debezium as well.

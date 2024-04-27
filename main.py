@@ -1,4 +1,3 @@
-from apscheduler.schedulers.background import BackgroundScheduler
 from fastapi import FastAPI, HTTPException, Depends
 from sqlalchemy import create_engine, Column, Integer, String
 from sqlalchemy.ext.declarative import declarative_base
@@ -6,23 +5,29 @@ from sqlalchemy.orm import sessionmaker, Session
 from typing import Dict, Generator
 import os
 from dotenv import load_dotenv
+from kafka import KafkaConsumer
+import json
+import asyncio
 
 load_dotenv()  # Load environment variables from .env file
 
-app = FastAPI()
-
-# Load credentials from environment variables securely
+# Load credentials for Database 1 from environment variables
 DB1_HOST = os.getenv("DB1_HOST")
 DB1_PORT = int(os.getenv("DB1_PORT"))
 DB1_USER = os.getenv("DB1_USER")
 DB1_PASSWORD = os.getenv("DB1_PASSWORD")
 DB1_DATABASE = os.getenv("DB1_DATABASE")
 
+# Load credentials for Database 2 from environment variables
 DB2_HOST = os.getenv("DB2_HOST")
 DB2_PORT = int(os.getenv("DB2_PORT"))
 DB2_USER = os.getenv("DB2_USER")
 DB2_PASSWORD = os.getenv("DB2_PASSWORD")
 DB2_DATABASE = os.getenv("DB2_DATABASE")
+
+# Kafka server and topic details
+KAFKA_SERVER = os.getenv("KAFKA_SERVER")
+KAFKA_TOPIC = os.getenv("KAFKA_TOPIC")
 
 # Connect to Database 1 and Database 2 securely
 engine1 = create_engine(f"postgresql://{DB1_USER}:{DB1_PASSWORD}@{DB1_HOST}:{DB1_PORT}/{DB1_DATABASE}", pool_size=5, max_overflow=10)
@@ -45,28 +50,6 @@ class SubscriptionStatus(Base):
 Base.metadata.create_all(bind=engine1)
 Base.metadata.create_all(bind=engine2)
 
-# Synchronization function
-def sync_subscription_status():
-    try:
-        with SessionLocal1() as session1, SessionLocal2() as session2:
-            subscription_statuses = session1.query(SubscriptionStatus).all()
-            for subscription_status in subscription_statuses:
-                subscription_status_db2 = session2.query(SubscriptionStatus).filter_by(email=subscription_status.email).first()
-                if subscription_status_db2:
-                    subscription_status_db2.status = subscription_status.status
-                else:
-                    subscription_status_db2 = SubscriptionStatus(email=subscription_status.email, status=subscription_status.status)
-                    session2.add(subscription_status_db2)
-            session2.commit()
-    except Exception as e:
-        # Log the error or handle it appropriately
-        print(f"Error occurred during synchronization: {e}")
-
-# Scheduler setup
-scheduler = BackgroundScheduler()
-scheduler.add_job(sync_subscription_status, 'interval', seconds=10)
-scheduler.start()
-
 # Dependency to get a session for Database 1
 def get_db1_session() -> Generator[Session, None, None]:
     try:
@@ -74,6 +57,52 @@ def get_db1_session() -> Generator[Session, None, None]:
         yield db
     finally:
         db.close()
+
+# Dependency to get a session for Database 2
+def get_db2_session() -> Generator[Session, None, None]:
+    try:
+        db = SessionLocal2()
+        yield db
+    finally:
+        db.close()
+
+# Initialize FastAPI app
+app = FastAPI()
+
+# Kafka Consumer setup
+consumer = KafkaConsumer(
+    KAFKA_TOPIC,
+    bootstrap_servers=KAFKA_SERVER,
+    auto_offset_reset="earliest",
+    enable_auto_commit=True,
+    group_id="fastapi-group",
+    value_deserializer=lambda x: json.loads(x.decode("utf-8"))
+)
+
+# Function to consume Kafka messages and update database
+async def consume_and_update_db():
+    for message in consumer:
+        data = message.value
+        email = data.get("email")
+        status = data.get("status")
+
+        if email and status:
+            with SessionLocal2() as session:
+                subscription_status = session.query(SubscriptionStatus).filter_by(email=email).first()
+                if subscription_status:
+                    subscription_status.status = status
+                else:
+                    subscription_status = SubscriptionStatus(email=email, status=status)
+                    session.add(subscription_status)
+                session.commit()
+
+# Background task to consume Kafka messages
+async def startup_event():
+    await asyncio.create_task(consume_and_update_db())
+
+@app.on_event("startup")
+async def startup_event():
+    asyncio.create_task(consume_and_update_db())
 
 # FastAPI endpoints
 @app.post("/subscription_status", response_model=Dict[str, str])
