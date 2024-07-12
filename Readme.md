@@ -202,5 +202,4 @@ Step 5: Test the Application
 Use an API testing tool like Postman or curl to send requests to the FastAPI endpoints (/subscription_status) to create, read, update, and delete subscription statuses.
 Monitor the terminal where you ran the FastAPI application to see if there are any errors or messages related to Kafka message consumption.
 
-Note:This code is completed 70 percent according to your requirements to achieve 100  percent accurate functionality result we will have to add more configuration
-with additional libraries and after that it will be ready for the production level and if you give me go ahead i will make it completely for the production level with using docker kubernetes and debezium as well.
+Note:This code is completed 70 percent according to your requirements for approach 2 and 50 percent for approach 3 and approach 1 code has been done seperately to complete 2 and 3 approaches completely i will have to do some more modifications if you say this is enough to test my coding and problem solving skills then it's okay otherwise respond me back so i can complete this ahead of this thanks for production level.

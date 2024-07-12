@@ -98,11 +98,9 @@ async def consume_and_update_db():
 
 # Background task to consume Kafka messages
 async def startup_event():
-    await asyncio.create_task(consume_and_update_db())
-
-@app.on_event("startup")
-async def startup_event():
     asyncio.create_task(consume_and_update_db())
+
+app.add_event_handler("startup", startup_event)
 
 # FastAPI endpoints
 @app.post("/subscription_status", response_model=Dict[str, str])
