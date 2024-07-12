@@ -1,6 +1,6 @@
 Code Solution Documentation
 Introduction
-The provided code solution is a microservice developed using FastAPI, SQLAlchemy, and Kafka. It synchronizes subscription statuses between two PostgreSQL databases, leveraging Kafka for message streaming and asynchronous processing. This documentation provides a detailed overview of the code solution, including its architecture, functionality, setup instructions, and an evaluation based on the specified criteria.
+The provided code solution is a microservice developed using FastAPI,Python SQLAlchemy, and Kafka. It synchronizes subscription statuses between two PostgreSQL databases, leveraging Kafka for message streaming and asynchronous processing. This documentation provides a detailed overview of the code solution, including its architecture, functionality, setup instructions, and an evaluation based on the specified criteria.
 
 Architecture Overview
 The microservice architecture consists of the following components:
